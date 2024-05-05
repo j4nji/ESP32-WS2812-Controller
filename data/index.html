@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>LED Control</title>
+ <link href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" rel="stylesheet" />
+ <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr"></script>
+ <style>
+    body {
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      background-color: #1c1c24;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column; /* Stack elements vertically */
+      position: relative; /* Add relative positioning to the body */
+    }
+    #toggleButton {
+      font-size: 30px; /* Increase font size */
+      padding: 10px 150px; /* Increase padding */
+      border: none;
+      border-radius: 50px; /* Rounded corners */
+      background-color: #ba5400; 
+      color: white;
+      cursor: pointer;
+      position: absolute; /* Absolute positioning */
+      top: 50%; /* Center vertically */
+      left: 50%; /* Center horizontally */
+      transform: translate(-50%, -50%); /* Adjust for the size of the button */
+      transition: background-color 0.3s ease; /* Smooth transition */
+    }
+    #toggleButton:hover {
+      background-color: #ff7300;
+    }
+
+    .color-picker {
+      width: 300px; /* Increase width */
+      height: 300px; /* Increase height */
+    }
+    
+ </style>
+ <script>
+  document.addEventListener('DOMContentLoaded', function() {
+  var ws = new WebSocket('ws://' + location.hostname + '/ws');
+  var toggleButton = document.getElementById('toggleButton');
+  var isOn = false;
+
+  var pickr = Pickr.create({
+    el: '.color-picker',
+    theme: 'classic',
+    padding: 25,
+    autoReposition: true,
+    position: 'bottom-middle',
+    default: '#ff1900',
+    showAlways: true,
+    components: {      
+      hue: true,
+    }
+  });
+
+  function sendColorAndState() {
+    var color = pickr.getColor().toRGBA();
+    var r = color[0];
+    var g = color[1];
+    var b = color[2];
+    ws.send(new Uint8Array([r, g, b, isOn ? 1 : 0]));
+  }
+
+  pickr.on('save', sendColorAndState);
+
+  // Add this line to update the color in real time
+  pickr.on('change', sendColorAndState);
+
+  // Toggle LEDs on/off
+  toggleButton.addEventListener('click', function() {
+    isOn = !isOn;
+    sendColorAndState();
+  });
+});
+</script>
+
+</head>
+<body>
+ <div class="color-picker"></div>
+ <button id="toggleButton">Turn On/Off</button>
+</body>
+</html>
