@@ -6,8 +6,10 @@
 
 #define LED_PIN     4
 #define NUM_LEDS    144
-#define DATA_RATE   800000
 #define RATE_LIMIT_MS 10 // Rate limit in milliseconds
+
+const char* ssid     = "SSID";     // your network SSID (name)
+const char* password = "Password"; // your network password
 
 CRGB leds[NUM_LEDS];
 unsigned long lastProcessedTime = 0; // Timestamp of the last processed message
@@ -27,12 +29,17 @@ void setup() {
  }
 
  // Connect to WiFi
- WiFi.begin("iliadbox-693C65", "4c6ckqh34tqdx253qhvw5t");
+ WiFi.begin(ssid, password);
+ Serial.print("Connecting to ");
+ Serial.print(ssid); Serial.println(" ...");
  while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi...");
  }
  Serial.println("Connected to WiFi");
+ Serial.print("IP address:\t");
+ Serial.println(WiFi.localIP());
+ 
 
  // Web server setup
  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
